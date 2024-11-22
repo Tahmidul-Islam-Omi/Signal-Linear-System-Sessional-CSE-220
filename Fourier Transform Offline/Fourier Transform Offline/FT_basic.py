@@ -2,8 +2,31 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define the interval and function and generate appropriate x values and y values
-x_values = np.linspace(-10, 10, 1000)
-y_values = x_values**2  # Function y = x^2
+# Parabolic Function
+# x_values = np.linspace(-10, 10, 1000)
+# y_values = np.where((x_values >= -2) & (x_values <= 2), x_values**2, 0)
+
+# Triangular Function
+# x_values = np.linspace(-10, 10, 1000)
+# y_values = np.zeros_like(x_values)
+
+# mask = (x_values >= -2) & (x_values <= 2)
+# y_values[mask] = 1 - np.abs(x_values[mask])/2
+
+# Sawtooth Function
+# x_values = np.linspace(-10, 10, 1000)
+# y_values = np.zeros_like(x_values)
+
+# mask = (x_values >= -2) & (x_values <= 2)
+# y_values[mask] = x_values[mask]
+
+# Rectangular Function
+# x_values = np.linspace(-10, 10, 1000)
+# y_values = np.zeros_like(x_values)
+
+# # Create rectangular function
+# mask = (x_values >= -2) & (x_values <= 2)
+# y_values[mask] = 1
 
 # Plot the original function
 plt.figure(figsize=(12, 4))
@@ -26,10 +49,9 @@ def fourier_transform(signal, frequencies, sampled_times):
     ft_result_real = np.zeros(num_freqs)
     ft_result_imag = np.zeros(num_freqs)
     
-    dt = sampled_times[1] - sampled_times[0]  # Time step for integration
+    dt = sampled_times[1] - sampled_times[0] 
     
     for i, freq in enumerate(frequencies):
-        # Calculate real and imaginary parts using trapezoidal integration
         integrand_real = signal * np.cos(-2 * np.pi * freq * sampled_times)
         integrand_imag = signal * np.sin(-2 * np.pi * freq * sampled_times)
         
@@ -53,12 +75,11 @@ plt.show()
 def inverse_fourier_transform(ft_signal, frequencies, sampled_times):
     n = len(sampled_times)
     reconstructed_signal = np.zeros(n)
-    df = frequencies[1] - frequencies[0]  # Frequency step for integration
+    df = frequencies[1] - frequencies[0]
     
     ft_real, ft_imag = ft_signal
     
     for i, t in enumerate(sampled_times):
-        # Reconstruct signal using trapezoidal integration
         integrand_real = (ft_real * np.cos(2 * np.pi * frequencies * t) - 
                          ft_imag * np.sin(2 * np.pi * frequencies * t))
         reconstructed_signal[i] = np.trapz(integrand_real, dx=df)

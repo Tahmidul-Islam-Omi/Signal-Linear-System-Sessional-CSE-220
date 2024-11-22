@@ -3,7 +3,7 @@ import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 
 # Step 1: Load the audio file
-sample_rate, data = wavfile.read('buzzjc.wav')
+sample_rate, data = wavfile.read('Fourier Transform Offline/buzzjc.wav')
 data = data / np.max(np.abs(data))  # Normalize to -1 to 1
 
 # If stereo, convert to mono by averaging channels
@@ -32,8 +32,20 @@ frequencies = np.linspace(0, max_freq, num=num_freqs)
 
 # Step 2: Apply Fourier Transform using trapezoidal integration
 def fourier_transform(signal, frequencies, sampled_times):
-    # use your code here from the first task
+    num_freqs = len(frequencies)
+    ft_result_real = np.zeros(num_freqs)
+    ft_result_imag = np.zeros(num_freqs)
     
+    dt = sampled_times[1] - sampled_times[0] 
+    
+    for i, freq in enumerate(frequencies):
+        integrand_real = signal * np.cos(-2 * np.pi * freq * sampled_times)
+        integrand_imag = signal * np.sin(-2 * np.pi * freq * sampled_times)
+        
+        ft_result_real[i] = np.trapz(integrand_real, dx=dt)
+        ft_result_imag[i] = np.trapz(integrand_imag, dx=dt)
+
+    return ft_result_real, ft_result_imag
 
 # Apply FT with trapezoidal integration
 ft_data = fourier_transform(data_sampled, frequencies, sampled_times)
@@ -47,13 +59,15 @@ plt.ylabel("Magnitude")
 plt.show()
 
 # Step 3: Filter out unwanted noise frequencies
-filtered_ft_data= np.zeros((2, num_freqs))
+filtered_ft_data = np.zeros((2, num_freqs))
 filtered_ft_data[0] = ft_data[0].copy()
 filtered_ft_data[1] = ft_data[1].copy()
 
-# Try to filter out the frequencies for which you get the best result.
-# Experiment with different ideas like make the values for low frequencies zero, or make high frequencies zero, or make a range of frequencies zero. 
-
+# Filter out high frequencies (above 2000 Hz) as they often contain noise
+cutoff_freq = 2000  # Hz
+mask = frequencies <= cutoff_freq
+filtered_ft_data[0][~mask] = 0
+filtered_ft_data[1][~mask] = 0
 
 # Step 3.1: Visualize the filtered frequency spectrum
 plt.figure(figsize=(12, 6))
@@ -65,7 +79,18 @@ plt.show()
 
 # Step 4: Apply Inverse Fourier Transform using trapezoidal integration
 def inverse_fourier_transform(ft_signal, frequencies, sampled_times):
-    # use your code here from the first task
+    n = len(sampled_times)
+    reconstructed_signal = np.zeros(n)
+    df = frequencies[1] - frequencies[0]
+    
+    ft_real, ft_imag = ft_signal
+    
+    for i, t in enumerate(sampled_times):
+        integrand_real = (ft_real * np.cos(2 * np.pi * frequencies * t) - 
+                         ft_imag * np.sin(2 * np.pi * frequencies * t))
+        reconstructed_signal[i] = np.trapz(integrand_real, dx=df)
+        
+    return reconstructed_signal
 
 # Step 4.1: Reconstruct the signal using IFT
 filtered_data = inverse_fourier_transform(filtered_ft_data, frequencies, sampled_times)
@@ -80,7 +105,7 @@ plt.show()
 
 # Step 5: Normalize and save the denoised audio
 filtered_data = np.int16(filtered_data / np.max(np.abs(filtered_data)) * 32767)  # Convert to int16 format for WAV
-wavfile.write('denoised_audio.wav', sample_rate, filtered_data)
+wavfile.write('denoised_audio_test.wav', sample_rate, filtered_data)
 
 print("Denoised audio saved as 'denoised_audio.wav'")
 
