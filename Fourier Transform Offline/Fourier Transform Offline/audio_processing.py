@@ -63,11 +63,17 @@ filtered_ft_data = np.zeros((2, num_freqs))
 filtered_ft_data[0] = ft_data[0].copy()
 filtered_ft_data[1] = ft_data[1].copy()
 
-# Filter out high frequencies (above 2000 Hz) as they often contain noise
+# Modified filtering approach with smoother cutoff
 cutoff_freq = 2000  # Hz
+transition_width = 500  # Hz for smooth transition
 mask = frequencies <= cutoff_freq
-filtered_ft_data[0][~mask] = 0
-filtered_ft_data[1][~mask] = 0
+transition_mask = (frequencies > cutoff_freq) & (frequencies <= (cutoff_freq + transition_width))
+transition_factor = 1 - ((frequencies - cutoff_freq) / transition_width)
+
+filtered_ft_data[0][~mask & ~transition_mask] = 0
+filtered_ft_data[1][~mask & ~transition_mask] = 0
+filtered_ft_data[0][transition_mask] *= transition_factor[transition_mask]
+filtered_ft_data[1][transition_mask] *= transition_factor[transition_mask]
 
 # Step 3.1: Visualize the filtered frequency spectrum
 plt.figure(figsize=(12, 6))
@@ -103,8 +109,10 @@ plt.xlabel("Time (s)")
 plt.ylabel("Amplitude")
 plt.show()
 
-# Step 5: Normalize and save the denoised audio
-filtered_data = np.int16(filtered_data / np.max(np.abs(filtered_data)) * 32767)  # Convert to int16 format for WAV
+# Step 5: Improved normalization
+filtered_data = np.real(filtered_data)  # Ensure we only keep real components
+filtered_data = filtered_data / np.max(np.abs(filtered_data))
+filtered_data = np.int16(filtered_data * 32767)  # Convert to int16 format for WAV
 wavfile.write('denoised_audio_test.wav', sample_rate, filtered_data)
 
 print("Denoised audio saved as 'denoised_audio.wav'")
