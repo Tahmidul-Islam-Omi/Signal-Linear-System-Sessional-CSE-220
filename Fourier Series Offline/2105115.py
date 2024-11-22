@@ -10,20 +10,20 @@ class FourierSeries:
     def calculate_a0(self, N=1000):
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
-        a0 = (1/ (2 * self.L)) * np.trapz(y, x)
-        return a0;
+        a0 = (1/ (self.L)) * np.trapz(y, x)
+        return a0
 
     def calculate_an(self, n, N=1000):
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
         an = (2/ (2 * self.L)) * np.trapz(y * np.cos(n * np.pi * x / self.L) , x)
-        return an;
+        return an
 
     def calculate_bn(self, n, N=1000):
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
         bn = (2/ (2 * self.L)) * np.trapz(y * np.sin(n * np.pi * x / self.L) , x)
-        return bn;
+        return bn
 
     def approximate(self, x):
         

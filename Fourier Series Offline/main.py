@@ -11,19 +11,18 @@ class FourierSeries:
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
         a0 = (1/ (2 * self.L)) * np.trapz(y, x)
-        return a0;
+        return a0
 
     def calculate_an(self, n, N=1000):
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
         an = (2/ (2 * self.L)) * np.trapz(y * np.cos(n * np.pi * x / self.L) , x)
-        return an;
-
+        return an
     def calculate_bn(self, n, N=1000):
         x = np.linspace(-self.L, self.L , N)
         y = self.func(x)
         bn = (2/ (2 * self.L)) * np.trapz(y * np.sin(n * np.pi * x / self.L) , x)
-        return bn;
+        return bn
 
     def approximate(self, x):
         
@@ -61,11 +60,9 @@ def target_function(x, function_type="square"):
         return np.sign(np.sin(x))
     
     elif function_type == "sawtooth":
-        # Sawtooth wave: linearly increasing from -1 to 1 over the period
         return 2 * (x / (2 * np.pi) - np.floor(x / (2 * np.pi) + 0.5))
     
     elif function_type == "triangle":
-        # Triangle wave: periodic line with slope +1 and -1 alternately
         return 2 * np.abs(2 * (x / (2 * np.pi) - np.floor(x / (2 * np.pi) + 0.5))) - 1
     
     elif function_type == "sine":
@@ -80,7 +77,7 @@ def target_function(x, function_type="square"):
 # Example of using these functions in the FourierSeries class
 if __name__ == "__main__":
     L = np.pi  # Half-period for all functions
-    terms = 10  # Number of terms in Fourier series
+    terms = 3  # Number of terms in Fourier series
 
     # Test each type of target function
     for function_type in ["square", "sawtooth", "triangle", "sine", "cosine"]:
